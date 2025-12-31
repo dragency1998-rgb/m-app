@@ -1025,7 +1025,7 @@ function InvoiceDetailsTable({ data, calculateCreditPeriod }: InvoiceDetailsTabl
                 const ageingColor = invoice.ageing > 0 
                   ? 'text-red-600 font-semibold' 
                   : 'text-slate-600';
-                const isCashInvoice = invoice.payment_type === 'Cash';
+                const isCashInvoice = invoice.payment_type?.toLowerCase() === 'cash';
                 const rowBgColor = isCashInvoice ? 'bg-blue-50' : 'hover:bg-slate-50';
 
                 return (

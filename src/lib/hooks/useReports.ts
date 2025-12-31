@@ -102,7 +102,22 @@ export function useInvoiceReports(groupBy: string = 'all', filter: string = 'all
           ...doc.data()
         } as InvoiceReportData));
 
-        console.log('Fetched invoices from Firebase:', invoices.length);
+        console.log('===== INVOICE REPORTS DEBUG =====');
+        console.log('Total Fetched invoices from Firebase:', invoices.length);
+        console.log('PaymentType Filter Parameter:', paymentType);
+        
+        // Sample check - show first 5 invoices and their payment_type values
+        console.log('Sample invoices (first 5):');
+        invoices.slice(0, 5).forEach((inv, idx) => {
+          console.log(`  [${idx}] Invoice: ${inv.invoice}, payment_type: "${inv.payment_type}" (type: ${typeof inv.payment_type})`);
+        });
+        
+        // Count invoices by payment type
+        const cashCount = invoices.filter(inv => inv.payment_type === 'Cash').length;
+        const gstCount = invoices.filter(inv => inv.payment_type === 'GST').length;
+        const noTypeCount = invoices.filter(inv => !inv.payment_type).length;
+        console.log(`Payment Type Breakdown: Cash=${cashCount}, GST=${gstCount}, None=${noTypeCount}`);
+        console.log('================================');
 
         // Apply buyer/mfg filters
         let filtered = [...invoices];
@@ -113,11 +128,25 @@ export function useInvoiceReports(groupBy: string = 'all', filter: string = 'all
           filtered = filtered.filter((inv) => inv.mfg === mfg);
         }
 
-        // Apply payment type filter
+        // Apply payment type filter (case-insensitive)
         if (paymentType === 'cash') {
-          filtered = filtered.filter((inv) => inv.payment_type === 'Cash');
+          const beforeCount = filtered.length;
+          // Support both 'Cash', 'cash', and variations
+          filtered = filtered.filter((inv) => {
+            const pt = inv.payment_type?.toLowerCase();
+            return pt === 'cash';
+          });
+          console.log(`Applied CASH filter: ${beforeCount} → ${filtered.length} invoices`);
         } else if (paymentType === 'gst') {
-          filtered = filtered.filter((inv) => inv.payment_type === 'GST');
+          const beforeCount = filtered.length;
+          // Support both 'GST', 'gst', and variations
+          filtered = filtered.filter((inv) => {
+            const pt = inv.payment_type?.toLowerCase();
+            return pt === 'gst';
+          });
+          console.log(`Applied GST filter: ${beforeCount} → ${filtered.length} invoices`);
+        } else {
+          console.log(`No payment type filter (paymentType="${paymentType}"), showing all: ${filtered.length} invoices`);
         }
 
         // Apply invoice status filter (PAID/UNPAID)

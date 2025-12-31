@@ -594,13 +594,13 @@ export default function TextileHubDashboard() {
       else if (invoiceFilters.ageingType === 'UPCOMING')
         matchesAgeing = inv.ageing <= 0 && inv.status === 'UNPAID';
 
-      // NEW: Payment Type Filter Logic
+      // NEW: Payment Type Filter Logic (case-insensitive)
       let matchesPaymentType = true;
       if (invoiceFilters.paymentType !== 'all') {
         if (invoiceFilters.paymentType === 'cash') {
-          matchesPaymentType = inv.payment_type === 'Cash';
+          matchesPaymentType = inv.payment_type?.toLowerCase() === 'cash';
         } else if (invoiceFilters.paymentType === 'gst') {
-          matchesPaymentType = inv.payment_type === 'GST';
+          matchesPaymentType = inv.payment_type?.toLowerCase() === 'gst';
         }
       }
 
@@ -828,18 +828,19 @@ export default function TextileHubDashboard() {
             const isOverdue = inv.ageing > 0 && inv.status === 'UNPAID';
             const isPaid = inv.status === 'PAID';
             const statusColor = isPaid ? 'green' : (inv.isReturn ?? false) ? 'purple' : isOverdue ? 'red' : 'blue';
+            const isCashInvoice = inv.payment_type?.toLowerCase() === 'cash';
 
             return (
               <Card 
                 key={idx} 
-                className={`p-4 ${inv.payment_type === 'Cash' ? 'bg-blue-50 border-blue-200 border' : ''}`}
+                className={`p-4 ${isCashInvoice ? 'bg-blue-50 border-blue-200 border' : ''}`}
               >
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-slate-800 text-lg">#{inv.invoice}</span>
                       <Badge color={statusColor}>{inv.status}</Badge>
-                      {inv.payment_type === 'Cash' && <span className="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded font-bold">💰 CASH</span>}
+                      {isCashInvoice && <span className="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded font-bold">💰 CASH</span>}
                     </div>
                     <div className="text-xs text-slate-500 mt-1">
                       <Calendar size={12} className="inline mr-1" />
